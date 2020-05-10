@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "byebug"
 require "active_record/database_configurations/database_config"
 require "active_record/database_configurations/hash_config"
 require "active_record/database_configurations/url_config"
@@ -246,7 +247,9 @@ module ActiveRecord
 
       def merge_db_environment_variables(current_env, configs)
         configs.map do |config|
-          next config if config.is_a?(UrlConfig) || config.env_name != current_env
+          next config if config.is_a?(UrlConfig) || (config.env_name != current_env && (config.env_name != 'test' && current_env != 'development') )
+
+          current_env = config.env_name == 'test' ? 'test' : current_env
 
           url_config = environment_url_config(current_env, config.name, config.configuration_hash)
           url_config || config

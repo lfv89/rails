@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "byebug"
 require "cases/helper"
 
 module ActiveRecord
@@ -97,6 +98,22 @@ module ActiveRecord
         ENV["RAILS_ENV"] = "test"
 
         config = { "production" => { "adapter" => "postgresql", "database" => "foo_prod" }, "test" => { "adapter" => "postgresql", "database" => "foo_test" } }
+        actual = resolve_db_config(:test, config)
+        expected = { adapter: "postgresql", database: "foo_test", host: "localhost" }
+
+        assert_equal expected, actual.configuration_hash
+      end
+
+      def test_resolver_with_database_uri_on_development_and_test
+        ENV["DATABASE_URL"] = "postgres://localhost"
+        ENV["RAILS_ENV"] = "development"
+
+        config = { "development" => { "adapter" => "postgresql", "database" => "foo_development" }, "test" => { "adapter" => "postgresql", "database" => "foo_test" } }
+        actual = resolve_db_config(:development, config)
+        # expected = { adapter: "postgresql", database: "foo_development", host: "localhost" }
+
+        # assert_equal expected, actual.configuration_hash
+
         actual = resolve_db_config(:test, config)
         expected = { adapter: "postgresql", database: "foo_test", host: "localhost" }
 
